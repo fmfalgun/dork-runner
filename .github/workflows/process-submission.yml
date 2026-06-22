@@ -1,0 +1,139 @@
+name: Process Dork Submission
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  process:
+    if: startsWith(github.event.issue.title, '[dork]')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse issue title
+        id: parse
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_USER: ${{ github.event.issue.user.login }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          python3 - << 'PYEOF'
+          import os, sys, re
+
+          title = os.environ['ISSUE_TITLE']
+          user  = os.environ['ISSUE_USER']
+          issue = os.environ['ISSUE_NUMBER']
+
+          # Strip [dork] prefix
+          body = re.sub(r'^\[dork\]\s*', '', title, flags=re.IGNORECASE).strip()
+          parts = [p.strip() for p in body.split('|')]
+
+          if len(parts) != 4:
+            print(f"::error::Expected 4 pipe-separated fields, got {len(parts)}: {body}")
+            sys.exit(1)
+
+          category, engine, description, pattern = parts
+
+          valid_engines = {'google', 'ddg', 'both'}
+          if engine.lower() not in valid_engines:
+            print(f"::error::Invalid engine '{engine}'. Must be: google, ddg, or both")
+            sys.exit(1)
+
+          if '$DOMAIN' not in pattern:
+            print(f"::error::query_pattern must contain $DOMAIN placeholder. Got: {pattern}")
+            sys.exit(1)
+
+          valid_categories = {
+            'directory-listings','file-exposure','admin-panels','credentials',
+            'error-messages','sqli-candidates','cms-detection','cloud-infra',
+            'paste-leaks','email-enumeration','subdomain-discovery','document-exposure','misc'
+          }
+          if category.lower() not in valid_categories:
+            print(f"::warning::Unknown category '{category}' — will be accepted as-is")
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+            f.write(f"category={category.lower()}\n")
+            f.write(f"engine={engine.lower()}\n")
+            f.write(f"description={description}\n")
+            f.write(f"pattern={pattern}\n")
+            f.write(f"user={user}\n")
+            f.write(f"issue={issue}\n")
+          print(f"Parsed: category={category} engine={engine} pattern={pattern}")
+          PYEOF
+
+      - name: Update dorks.json
+        env:
+          CATEGORY: ${{ steps.parse.outputs.category }}
+          ENGINE: ${{ steps.parse.outputs.engine }}
+          DESCRIPTION: ${{ steps.parse.outputs.description }}
+          PATTERN: ${{ steps.parse.outputs.pattern }}
+          SUBMITTED_BY: ${{ steps.parse.outputs.user }}
+        run: |
+          python3 - << 'PYEOF'
+          import json, os, datetime
+
+          path = 'web/data/dorks.json'
+          with open(path) as f:
+            data = json.load(f)
+
+          dorks = data.get('dorks', [])
+
+          # Check for duplicate pattern
+          for d in dorks:
+            if d['query_pattern'] == os.environ['PATTERN'] and d['engine'] == os.environ['ENGINE']:
+              print("Duplicate pattern — skipping append")
+              os.environ['GITHUB_OUTPUT'] and open(os.environ.get('GITHUB_OUTPUT',''), 'a').write("duplicate=true\n")
+              exit(0)
+
+          # Generate next ID
+          next_id = str(len(dorks) + 1).zfill(3)
+
+          new_entry = {
+            "id": next_id,
+            "category": os.environ['CATEGORY'],
+            "engine": os.environ['ENGINE'],
+            "query_pattern": os.environ['PATTERN'],
+            "description": os.environ['DESCRIPTION'],
+            "submitted_by": os.environ['SUBMITTED_BY'],
+            "submitted_at": datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+          }
+          dorks.append(new_entry)
+          data['dorks'] = dorks
+          data['total_dorks'] = len(dorks)
+
+          with open(path, 'w') as f:
+            json.dump(data, f, indent=2)
+          print(f"Added dork #{next_id}: {new_entry['query_pattern']}")
+          PYEOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add web/data/dorks.json
+          git diff --staged --quiet || git commit -m "data: add dork from @${{ steps.parse.outputs.user }} [skip ci]"
+          git push
+
+      - name: Close issue with comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const boardUrl = 'https://fmfalgun.github.io/dork-runner/dork-board.html';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `✅ Dork pattern added to the board!\n\nView it at: ${boardUrl}\n\nThank you for contributing to dork-runner!`
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: 'closed'
+            });

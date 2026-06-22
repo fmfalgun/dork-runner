@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dork Runner — Google + DDG OSINT Dork Launcher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #0D0F0A;
+      --card: #131710;
+      --border: #2A3028;
+      --cream: #E8E4D9;
+      --dim: #5A5F52;
+      --amber: #D4882A;
+      --khaki: #8B7355;
+      --green: #6FCA7A;
+      --blue: #7AA8CA;
+      --red: #CC3333;
+      --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+      --font-display: 'Rajdhani', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--black);
+      color: var(--cream);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: var(--amber); text-decoration: none; }
+    a:hover { color: var(--cream); }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 52px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--green);
+      letter-spacing: 0.1em;
+    }
+    .nav-brand:hover { color: var(--cream); }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--dim);
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--cream); }
+    .nav-links a.nav-active { color: var(--amber); }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 4rem 2rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--cream);
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 span { color: var(--green); }
+
+    .hero-tagline {
+      color: var(--dim);
+      font-size: 0.95rem;
+      max-width: 540px;
+      margin: 0 auto 1.8rem;
+    }
+
+    .install-block {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 0.6rem 1.2rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .install-label {
+      color: var(--dim);
+      font-size: 0.8rem;
+    }
+
+    .install-cmd {
+      color: var(--green);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+    }
+
+    .hero-cta-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .cta-btn {
+      background: var(--green);
+      color: var(--black);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      padding: 0.65rem 1.6rem;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      display: inline-block;
+    }
+    .cta-btn:hover { opacity: 0.85; color: var(--black); }
+
+    .cta-ghost {
+      color: var(--dim);
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      padding: 0.65rem 1.2rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .cta-ghost:hover { color: var(--cream); border-color: var(--dim); }
+
+    /* LAYOUT */
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 0;
+      flex: 1;
+    }
+
+    /* INFO PANEL */
+    .info-panel {
+      border-right: 1px solid var(--border);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .panel-block {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 1rem 1.1rem;
+    }
+
+    .panel-block-title {
+      color: var(--amber);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+      font-family: var(--font-mono);
+    }
+
+    .panel-block p {
+      color: var(--dim);
+      font-size: 0.82rem;
+      line-height: 1.7;
+    }
+
+    .panel-block p + p { margin-top: 0.5rem; }
+
+    /* ASCII arch diagram */
+    .arch-diagram {
+      font-size: 0.75rem;
+      color: var(--dim);
+      line-height: 1.8;
+      margin-top: 0.5rem;
+    }
+
+    .arch-diagram .arch-node {
+      display: block;
+      padding: 0.15rem 0.5rem;
+      margin: 0.15rem 0;
+      border-left: 2px solid var(--border);
+    }
+
+    .arch-diagram .arch-node.user { border-color: var(--cream); color: var(--cream); }
+    .arch-diagram .arch-node.runner { border-color: var(--green); color: var(--green); }
+    .arch-diagram .arch-node.opt-a { border-color: var(--amber); color: var(--amber); }
+    .arch-diagram .arch-node.opt-b { border-color: var(--blue); color: var(--blue); }
+    .arch-diagram .arch-node.opt-c { border-color: var(--dim); color: var(--khaki); }
+
+    .arch-arrow {
+      display: block;
+      color: var(--border);
+      font-size: 0.75rem;
+      padding-left: 0.5rem;
+    }
+
+    /* MAIN */
+    .home-main {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .section-block {
+      border: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .section-block-title {
+      color: var(--amber);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      padding: 0.7rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+    }
+
+    .section-block-body {
+      padding: 1.2rem;
+    }
+
+    /* Code block */
+    .code-block {
+      background: var(--black);
+      border: 1px solid var(--border);
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.8;
+    }
+
+    .code-block .line-comment { color: var(--dim); }
+    .code-block .line-cmd { color: var(--green); }
+    .code-block .line-output { color: var(--khaki); }
+    .code-block .line-header { color: var(--amber); }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+
+    .data-table th {
+      color: var(--amber);
+      text-align: left;
+      padding: 0.5rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      font-weight: normal;
+      letter-spacing: 0.05em;
+    }
+
+    .data-table td {
+      padding: 0.55rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--dim);
+      vertical-align: top;
+    }
+
+    .data-table td:first-child { color: var(--cream); }
+
+    .data-table tr:last-child td { border-bottom: none; }
+
+    .tag-yes { color: var(--green); }
+    .tag-no { color: var(--red); }
+    .tag-opt { color: var(--amber); }
+
+    /* CSE steps */
+    .cse-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+    }
+
+    .cse-step {
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+    }
+
+    .cse-step-num {
+      color: var(--amber);
+      font-size: 0.8rem;
+      min-width: 1.4rem;
+      margin-top: 0.05rem;
+    }
+
+    .cse-step-text {
+      color: var(--dim);
+      font-size: 0.83rem;
+      line-height: 1.6;
+    }
+
+    .cse-step-text a { color: var(--blue); }
+    .cse-step-text code {
+      background: var(--black);
+      padding: 0.1rem 0.35rem;
+      color: var(--green);
+      font-size: 0.8rem;
+    }
+
+    /* HOF CTA card */
+    .hof-cta-card {
+      border: 1px solid var(--border);
+      background: var(--black);
+      padding: 1rem 1.4rem;
+      font-size: 0.9rem;
+      color: var(--dim);
+    }
+
+    .hof-cta-card a { color: var(--green); }
+    .hof-cta-card a:hover { color: var(--cream); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1rem 2rem;
+      text-align: center;
+      color: var(--dim);
+      font-size: 0.8rem;
+    }
+
+    footer a { color: var(--dim); }
+    footer a:hover { color: var(--cream); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">DORK-RUNNER</a>
+  <div class="nav-links">
+    <a href="index.html" class="nav-active">Home</a>
+    <a href="dork-runner.html">Runner</a>
+    <a href="dork-board.html">Dork Board</a>
+    <a href="https://github.com/fmfalgun/dork-runner" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <a href="https://fmfalgun.github.io" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>DORK <span>RUNNER</span></h1>
+  <p class="hero-tagline">Google + DDG dork query launcher with passive OSINT APIs. 400+ built-in patterns, community dork board.</p>
+  <div class="install-block">
+    <span class="install-label">CLI:</span>
+    <code class="install-cmd">bash ddgr-dorks.sh nmap.org</code>
+  </div>
+  <div class="hero-cta-row">
+    <a href="dork-runner.html" class="cta-btn">→ Open Runner</a>
+    <a href="https://github.com/fmfalgun/dork-runner" class="cta-ghost" target="_blank">GitHub ↗</a>
+  </div>
+</section>
+
+<div class="layout">
+  <aside class="info-panel">
+
+    <div class="panel-block">
+      <div class="panel-block-title">&gt; WHAT ARE DORKS</div>
+      <p>Search engine operators that expose sensitive information indexed by mistake. Patterns like <code style="color:var(--green);font-size:0.8rem">site:target.com filetype:env</code> or <code style="color:var(--green);font-size:0.8rem">intitle:"index of" /admin</code> surface config files, credentials, directory listings, and admin panels that were never meant to be public.</p>
+      <p style="margin-top:0.6rem">Used in passive OSINT reconnaissance — no direct target interaction required.</p>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-block-title">&gt; WHY THIS TOOL</div>
+      <p>Combines query generation, passive APIs (Wayback Machine CDX, GitHub Code Search, crt.sh), optional Google CSE in-page results, and a community dork board — all in one interface.</p>
+      <p style="margin-top:0.6rem">400+ built-in dork patterns across 13 categories. Drop in a domain and it builds all applicable queries automatically.</p>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-block-title">&gt; HOW IT WORKS</div>
+      <div class="arch-diagram">
+        <span class="arch-node user">User enters domain</span>
+        <span class="arch-arrow">↓</span>
+        <span class="arch-node runner">Runner (dork-runner.html)</span>
+        <span class="arch-arrow">↓  ↓  ↓</span>
+        <span class="arch-node opt-a">Option A — Tab Launcher</span>
+        <span style="color:var(--dim);font-size:0.73rem;padding-left:0.5rem;display:block">Opens dork queries in new tabs</span>
+        <span class="arch-node opt-b" style="margin-top:0.5rem">Option B — Passive APIs</span>
+        <span style="color:var(--dim);font-size:0.73rem;padding-left:0.5rem;display:block">Wayback CDX + GitHub Search + crt.sh</span>
+        <span class="arch-node opt-c" style="margin-top:0.5rem">Option C — Google CSE API</span>
+        <span style="color:var(--dim);font-size:0.73rem;padding-left:0.5rem;display:block">In-page results (optional key required)</span>
+      </div>
+    </div>
+
+  </aside>
+
+  <main class="home-main">
+
+    <div class="section-block">
+      <div class="section-block-title">&gt; CLI USAGE</div>
+      <div class="section-block-body">
+        <div class="code-block">
+<span class="line-comment"># Google dorks via ddgr (CLI search)</span>
+<span class="line-cmd">$ bash ddgr-dorks.sh nmap.org</span>
+<span class="line-output">[*] Running 42 Google dork queries against nmap.org</span>
+<span class="line-output">[+] site:nmap.org filetype:env</span>
+<span class="line-output">    → 3 results found</span>
+<span class="line-output">      https://nmap.org/backup/.env</span>
+<span class="line-output">      ...</span>
+<span class="line-output">[+] site:nmap.org intitle:"index of"</span>
+<span class="line-output">    → 12 results found</span>
+<span class="line-output">      ...</span>
+<span class="line-output"></span>
+<span class="line-comment"># DDG dorks (no API key needed)</span>
+<span class="line-cmd">$ bash ddgr-dorks.sh nmap.org ddg</span>
+<span class="line-output">[*] Launching DDG queries in browser tabs...</span>
+<span class="line-output">[*] Fetching Wayback CDX for nmap.org...</span>
+<span class="line-output">    → 847 archived URLs found</span>
+<span class="line-output">[*] Querying GitHub Code Search for nmap.org...</span>
+<span class="line-output">    → 23 code references found</span>
+<span class="line-output">[*] Querying crt.sh for nmap.org subdomains...</span>
+<span class="line-output">    → 14 certificate entries found</span>
+</div>
+      </div>
+    </div>
+
+    <div class="section-block" id="engine-comparison">
+      <div class="section-block-title">&gt; ENGINE COMPARISON</div>
+      <div class="section-block-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Google</th>
+              <th>DDG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Tab Launcher (Option A)</td>
+              <td><span class="tag-yes">yes</span></td>
+              <td><span class="tag-yes">yes</span></td>
+            </tr>
+            <tr>
+              <td>Wayback CDX API</td>
+              <td><span class="tag-yes">yes</span></td>
+              <td><span class="tag-yes">yes</span></td>
+            </tr>
+            <tr>
+              <td>GitHub Code Search</td>
+              <td><span class="tag-yes">yes</span></td>
+              <td><span class="tag-yes">yes</span></td>
+            </tr>
+            <tr>
+              <td>crt.sh Subdomains</td>
+              <td><span class="tag-yes">yes</span></td>
+              <td><span class="tag-yes">yes</span></td>
+            </tr>
+            <tr>
+              <td>In-page search results</td>
+              <td><span class="tag-opt">optional (CSE key)</span></td>
+              <td><span class="tag-no">not available</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="color:var(--dim);font-size:0.82rem;margin-top:1rem;line-height:1.7">
+          <span style="color:var(--amber)">DDG limitation:</span> DuckDuckGo has no public search results API. Their API endpoint only returns instant answers (definitions, calculations, knowledge panel data) — not web search results. This means DDG mode is tab launcher + passive APIs only. There is no way to get DDG web results programmatically without scraping.<br><br>
+          <span style="color:var(--amber)">Google CSE:</span> Google's Programmable Search Engine API returns actual web search results in-page for up to 100 queries/day free (10 results per query). Requires a CSE ID and API key — see setup below.
+        </p>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-block-title">&gt; CSE SETUP — GOOGLE IN-PAGE RESULTS</div>
+      <div class="section-block-body">
+        <div class="cse-steps">
+          <div class="cse-step">
+            <span class="cse-step-num">01.</span>
+            <span class="cse-step-text">Go to <a href="https://programmablesearchengine.google.com" target="_blank" rel="noopener noreferrer">programmablesearchengine.google.com</a> → <strong style="color:var(--cream)">New search engine</strong></span>
+          </div>
+          <div class="cse-step">
+            <span class="cse-step-num">02.</span>
+            <span class="cse-step-text">Under "Sites to search" select <strong style="color:var(--cream)">Search the entire web</strong> — this lets you dork any domain, not just your own site</span>
+          </div>
+          <div class="cse-step">
+            <span class="cse-step-num">03.</span>
+            <span class="cse-step-text">After creation, open the engine → <strong style="color:var(--cream)">Overview</strong> → copy the <code>Search engine ID</code> (the <code>cx</code> value)</span>
+          </div>
+          <div class="cse-step">
+            <span class="cse-step-num">04.</span>
+            <span class="cse-step-text">Go to <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer">console.cloud.google.com</a> → APIs &amp; Services → Library → search <strong style="color:var(--cream)">Custom Search API</strong> → Enable</span>
+          </div>
+          <div class="cse-step">
+            <span class="cse-step-num">05.</span>
+            <span class="cse-step-text">APIs &amp; Services → Credentials → <strong style="color:var(--cream)">Create credentials → API key</strong> → copy the key</span>
+          </div>
+          <div class="cse-step">
+            <span class="cse-step-num">06.</span>
+            <span class="cse-step-text">In Runner, click <strong style="color:var(--cream)">⚙ Setup</strong> → paste both values → Save. Keys are stored in localStorage only — never sent anywhere except the Google CSE API.</span>
+          </div>
+          <div class="cse-step">
+            <span class="cse-step-num">07.</span>
+            <span class="cse-step-text">Free tier: 100 queries/day, 10 results each. <a href="https://developers.google.com/custom-search/v1/overview#pricing" target="_blank" rel="noopener noreferrer">Pricing ↗</a> if you need more.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hof-cta-card">
+      → <a href="dork-board.html">Browse community dorks ↗</a> — 400+ patterns contributed by researchers. Filter by category, engine, or keyword.
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  Built by <a href="https://fmfalgun.github.io">fmfalgun</a> &nbsp;·&nbsp;
+  <a href="dork-board.html">Dork Board</a> &nbsp;·&nbsp;
+  <a href="https://github.com/fmfalgun/dork-runner" target="_blank">GitHub ↗</a> &nbsp;·&nbsp;
+  <a href="dork-runner.html">Runner ↗</a>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "domain": "nmap.org",
+  "generated_at": "2026-06-22T05:00:00Z",
+  "wayback": {
+    "count": 42,
+    "entries": [
+      ["https://nmap.org/download.html", "200", "20240315120000"],
+      ["https://nmap.org/book/", "200", "20240301090000"],
+      ["https://nmap.org/changelog.html", "200", "20240210080000"],
+      ["https://nmap.org/nsedoc/", "200", "20240115070000"],
+      ["https://nmap.org/nmap_manpage.html", "200", "20231201060000"],
+      ["https://scanme.nmap.org/", "200", "20231115050000"],
+      ["https://seclists.org/nmap-dev/", "200", "20231001040000"],
+      ["https://nmap.org/svn/", "200", "20221201030000"],
+      ["https://nmap.org/dist/", "200", "20220601020000"],
+      ["https://nmap.org/data/", "200", "20210301010000"]
+    ]
+  },
+  "github": {
+    "total_count": 184320,
+    "items": [
+      {"name": "nmap-config.yml", "repository": "example/infra-config", "html_url": "https://github.com/example/infra-config/blob/main/nmap-config.yml"},
+      {"name": "scan.sh", "repository": "example/pentest-tools", "html_url": "https://github.com/example/pentest-tools/blob/main/scan.sh"},
+      {"name": "README.md", "repository": "example/security-notes", "html_url": "https://github.com/example/security-notes/blob/main/README.md"},
+      {"name": "Dockerfile", "repository": "example/scanner", "html_url": "https://github.com/example/scanner/blob/main/Dockerfile"},
+      {"name": "requirements.txt", "repository": "example/vuln-scanner", "html_url": "https://github.com/example/vuln-scanner/blob/main/requirements.txt"}
+    ]
+  },
+  "crtsh": {
+    "count": 12,
+    "names": [
+      "nmap.org",
+      "www.nmap.org",
+      "scanme.nmap.org",
+      "seclists.org",
+      "www.seclists.org",
+      "sectools.org",
+      "insecure.org",
+      "www.insecure.org",
+      "nmap.com",
+      "svn.nmap.org",
+      "*.nmap.org",
+      "npcap.com"
+    ]
+  }
+}

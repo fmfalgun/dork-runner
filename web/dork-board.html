@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dork Board — Dork Runner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #0D0F0A;
+      --card: #131710;
+      --border: #2A3028;
+      --cream: #E8E4D9;
+      --dim: #5A5F52;
+      --amber: #D4882A;
+      --khaki: #8B7355;
+      --green: #6FCA7A;
+      --blue: #7AA8CA;
+      --red: #CC3333;
+      --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+      --font-display: 'Rajdhani', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--black);
+      color: var(--cream);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: var(--amber); text-decoration: none; }
+    a:hover { color: var(--cream); }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 52px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--green);
+      letter-spacing: 0.1em;
+    }
+    .nav-brand:hover { color: var(--cream); }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--dim);
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--cream); }
+    .nav-links a.nav-active { color: var(--amber); }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--cream);
+      line-height: 1;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero h1 span { color: var(--amber); }
+
+    .hof-subheader {
+      color: var(--dim);
+      font-size: 0.85rem;
+    }
+
+    #board-stats { color: var(--khaki); }
+
+    /* FILTER ROW */
+    #filter-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      flex-wrap: wrap;
+    }
+
+    #search-input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--black);
+      border: 1px solid var(--border);
+      color: var(--cream);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      padding: 0.5rem 0.9rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    #search-input:focus { border-color: var(--amber); }
+    #search-input::placeholder { color: var(--dim); }
+
+    #engine-filter, #category-filter {
+      background: var(--black);
+      border: 1px solid var(--border);
+      color: var(--dim);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      padding: 0.5rem 0.7rem;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235A5F52'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.7rem center;
+      padding-right: 2rem;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    #engine-filter:focus, #category-filter:focus {
+      border-color: var(--amber);
+      color: var(--cream);
+    }
+
+    #engine-filter option, #category-filter option {
+      background: var(--black);
+      color: var(--cream);
+    }
+
+    #results-count {
+      color: var(--dim);
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    /* DORK LIST */
+    .board-content {
+      flex: 1;
+      padding: 1.5rem 2rem;
+    }
+
+    #dork-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .dork-card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 0.8rem 1.1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: border-color 0.15s;
+    }
+
+    .dork-card:hover { border-color: var(--dim); }
+
+    .dork-card-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .dork-query {
+      color: var(--green);
+      font-size: 0.88rem;
+      word-break: break-all;
+      line-height: 1.5;
+      margin-bottom: 0.35rem;
+    }
+
+    .dork-desc {
+      color: var(--dim);
+      font-size: 0.8rem;
+      line-height: 1.5;
+      margin-bottom: 0.4rem;
+    }
+
+    .dork-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .dork-cat {
+      font-size: 0.72rem;
+      color: var(--khaki);
+      background: var(--black);
+      padding: 0.1rem 0.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .dork-engine {
+      font-size: 0.72rem;
+      padding: 0.1rem 0.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .dork-engine.google { color: var(--amber); border-color: rgba(212,136,42,0.3); }
+    .dork-engine.ddg { color: var(--blue); border-color: rgba(122,168,202,0.3); }
+    .dork-engine.both { color: var(--green); border-color: rgba(111,202,122,0.3); }
+
+    .dork-author {
+      color: var(--dim);
+      font-size: 0.72rem;
+      opacity: 0.7;
+    }
+
+    .dork-card-action {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      align-items: flex-end;
+    }
+
+    .dork-try-btn {
+      background: var(--black);
+      border: 1px solid var(--border);
+      color: var(--dim);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.3rem 0.7rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .dork-try-btn:hover {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* EMPTY / LOADING */
+    #board-loading {
+      color: var(--dim);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 3rem 2rem;
+      opacity: 0.6;
+    }
+
+    #board-empty {
+      color: var(--dim);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 3rem 2rem;
+      display: none;
+    }
+
+    /* SUBMIT CTA */
+    .submit-cta {
+      margin: 2rem 0;
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 1.5rem 2rem;
+      text-align: center;
+    }
+
+    .submit-cta p {
+      color: var(--dim);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .cta-btn {
+      background: var(--green);
+      color: var(--black);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      padding: 0.65rem 1.6rem;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .cta-btn:hover { opacity: 0.85; color: var(--black); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1rem 2rem;
+      text-align: center;
+      color: var(--dim);
+      font-size: 0.8rem;
+    }
+
+    footer a { color: var(--dim); }
+    footer a:hover { color: var(--cream); }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">DORK-RUNNER</a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="dork-runner.html">Runner</a>
+    <a href="dork-board.html" class="nav-active">Dork Board</a>
+    <a href="https://github.com/fmfalgun/dork-runner" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <a href="https://fmfalgun.github.io" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>DORK <span>BOARD</span></h1>
+  <div class="hof-subheader">
+    <span id="board-stats">loading...</span>
+  </div>
+</section>
+
+<div id="filter-row">
+  <input type="text" id="search-input" placeholder="search dorks...">
+  <select id="engine-filter">
+    <option value="">All engines</option>
+    <option value="google">Google</option>
+    <option value="ddg">DDG</option>
+    <option value="both">Both</option>
+  </select>
+  <select id="category-filter">
+    <option value="">All categories</option>
+    <option value="directory-listings">Directory Listings</option>
+    <option value="file-exposure">File Exposure</option>
+    <option value="admin-panels">Admin Panels</option>
+    <option value="credentials">Credentials</option>
+    <option value="error-messages">Error Messages</option>
+    <option value="sqli-candidates">SQLi Candidates</option>
+    <option value="cms-detection">CMS Detection</option>
+    <option value="cloud-infra">Cloud/Infra</option>
+    <option value="paste-leaks">Paste Leaks</option>
+    <option value="email-enumeration">Email/Users</option>
+    <option value="subdomain-discovery">Subdomains</option>
+    <option value="document-exposure">Documents</option>
+    <option value="misc">Misc</option>
+  </select>
+  <span id="results-count"></span>
+</div>
+
+<div class="board-content">
+  <div id="board-loading">Loading dork board...</div>
+  <div id="board-empty">No dorks match your filters.</div>
+  <div id="dork-list"></div>
+
+  <div class="submit-cta">
+    <p>Have a useful dork pattern? Submit it to the board.</p>
+    <a href="https://github.com/fmfalgun/dork-runner/issues/new?title=[dork]+category+|+engine+|+description+|+site:$DOMAIN+pattern&body=Format:+%5Bdork%5D+CATEGORY+|+ENGINE+|+DESCRIPTION+|+QUERY_PATTERN%0A%0AExample:%0A%5Bdork%5D+file-exposure+|+google+|+Find+exposed+env+files+|+site:$DOMAIN+filetype:env" target="_blank" class="cta-btn">+ Submit Dork Pattern</a>
+  </div>
+</div>
+
+<footer>
+  <a href="index.html">← Home</a> &nbsp;·&nbsp;
+  <a href="dork-runner.html">Runner</a> &nbsp;·&nbsp;
+  Dork Board &nbsp;·&nbsp;
+  <a href="https://github.com/fmfalgun/dork-runner" target="_blank">GitHub ↗</a>
+</footer>
+
+<script src="assets/js/dork-board.js"></script>
+
+</body>
+</html>

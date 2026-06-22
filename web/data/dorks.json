@@ -1,0 +1,32 @@
+{
+  "total_dorks": 3,
+  "dorks": [
+    {
+      "id": "001",
+      "category": "file-exposure",
+      "engine": "google",
+      "query_pattern": "site:$DOMAIN filetype:sql",
+      "description": "Find exposed SQL dump files that may contain credentials or schema",
+      "submitted_by": "fmfalgun",
+      "submitted_at": "2026-06-22T10:00:00Z"
+    },
+    {
+      "id": "002",
+      "category": "credentials",
+      "engine": "both",
+      "query_pattern": "site:$DOMAIN intext:\"api_key\"",
+      "description": "Pages containing exposed API keys in body text",
+      "submitted_by": "fmfalgun",
+      "submitted_at": "2026-06-22T10:01:00Z"
+    },
+    {
+      "id": "003",
+      "category": "admin-panels",
+      "engine": "ddg",
+      "query_pattern": "site:$DOMAIN inurl:admin intitle:\"login\"",
+      "description": "Admin login panels indexed by DDG",
+      "submitted_by": "fmfalgun",
+      "submitted_at": "2026-06-22T10:02:00Z"
+    }
+  ]
+}
