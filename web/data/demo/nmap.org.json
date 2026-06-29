@@ -1,9 +1,60 @@
 {
   "domain": "nmap.org",
-  "generated_at": "2026-06-28T06:16:06Z",
+  "generated_at": "2026-06-29T06:44:56Z",
   "wayback": {
-    "count": 0,
-    "entries": []
+    "count": 50,
+    "entries": [
+      [
+        "http://www.nmap.org:80/",
+        "200",
+        "20000816230522"
+      ],
+      [
+        "http://nmap.org/5/",
+        "200",
+        "20110102081514"
+      ],
+      [
+        "https://nmap.org/5/dist/",
+        "200",
+        "20220521123217"
+      ],
+      [
+        "https://nmap.org/5/dist/ncat-5.00-1.i386.rpm",
+        "200",
+        "20250816165258"
+      ],
+      [
+        "https://nmap.org/5/dist/ncat-5.00-1.x86_64.rpm",
+        "200",
+        "20250816165253"
+      ],
+      [
+        "https://nmap.org/5/dist/nmap-5.00-1.i386.rpm",
+        "200",
+        "20250816165301"
+      ],
+      [
+        "https://nmap.org/5/dist/nmap-5.00-1.src.rpm",
+        "200",
+        "20250816165258"
+      ],
+      [
+        "https://nmap.org/5/dist/nmap-5.00-1.x86_64.rpm",
+        "200",
+        "20250816165302"
+      ],
+      [
+        "https://nmap.org/5/dist/nmap-5.00-setup.exe",
+        "200",
+        "20250816165254"
+      ],
+      [
+        "https://nmap.org/5/dist/nmap-5.00-win32.zip",
+        "200",
+        "20250816165300"
+      ]
+    ]
   },
   "github": {
     "total_count": 0,
