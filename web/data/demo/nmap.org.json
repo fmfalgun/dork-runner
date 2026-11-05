@@ -1,6 +1,6 @@
 {
   "domain": "nmap.org",
-  "generated_at": "2026-11-04T08:33:48Z",
+  "generated_at": "2026-11-05T08:55:40Z",
   "wayback": {
     "count": 0,
     "entries": []
@@ -10,13 +10,7 @@
     "items": []
   },
   "crtsh": {
-    "count": 5,
-    "names": [
-      "issues.nmap.org\nnmap.org\nsvn.nmap.org\nwww.nmap.org",
-      "nmap.org",
-      "nmap.org\nwww.nmap.org",
-      "svn.nmap.org",
-      "svn.nmap.org\nwww.svn.nmap.org"
-    ]
+    "count": 0,
+    "names": []
   }
 }
